@@ -85,3 +85,5 @@ struct Analysis{
 };
 
 Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool isAzimuth);
+
+void analyze(const string& title, const std::vector<Station>& s, int iterations);
