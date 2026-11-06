@@ -8,11 +8,6 @@
 #include <iomanip>
 #include "functions.h"
 
-constexpr double PI = 3.1415926535897932384626433832795;
-constexpr double SIGMA_DIST = 0.002;
-constexpr double SIGMA_ANGLE = 2.0 * PI / 648000.0;
-constexpr double TOLERANCE = 1e-89;
-
 namespace bm = boost::math;
 namespace bg = boost::geometry;
 
@@ -38,8 +33,9 @@ int main(){
   Station P2{"P2", Eigen::Vector2d{twoNP}, false};
 
 
-  // List of points
+  // List of pointers to points for use in makeStations function
   const Station* initial[]{&A_, &B_, &P1, &P2};
+  // vector of building points
 
   // Approximation of building corners and tank center
   const std::vector<Eigen::Vector2d> buildingPoints ={
@@ -51,6 +47,7 @@ int main(){
     {1500.0, 980.0} // top right corner
   };
 
+
   GeoPolygon building;
 
   for (const Eigen::Vector2d& point : buildingPoints){
@@ -60,8 +57,6 @@ int main(){
   bg::correct(building);
 
   // Approximate tank radius: 1170 - 1050 = 120m
-  const double tankRadius{120.0};
-  const GeoPoint tankCenterPoint(tankCenter[0], tankCenter[1]);
 
   // Iteration 1:
   // Task 1: Visual approximation of added points
@@ -70,8 +65,17 @@ int main(){
   std::vector<Station> addedStationsV1;
   addedStationsV1.push_back(P3);
 
+  std::vector<Station> preliminary = makeStations(initial);
   std::vector<Station> stationsV1 = makeStations(addedStationsV1, initial);
 
+  std::cout << std::fixed;
+  std::cout.precision(8);
+
+  analyze("Preliminary: no new stations",
+        preliminary, 1, buildingPoints, building);
+
+  analyze("Iteration 1: P3 added",
+  stationsV1, 1, buildingPoints, building);
 
 
   return 0;

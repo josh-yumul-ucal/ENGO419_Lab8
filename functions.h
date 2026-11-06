@@ -6,12 +6,16 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <vector>
+namespace bg = boost::geometry;
+
+using GeoPoint = bg::model::d2::point_xy<double>;
+using GeoLine = bg::model::linestring<GeoPoint>;
+using GeoPolygon = bg::model::polygon<GeoPoint>;
 
 extern const double chi95;
 extern const double delta0;
-extern const Eigen::Vector2d tankCenter{1050.0, 750.0};
-extern const double tankRadius{120.0};
-
+inline const Eigen::Vector2d tankCenter{1050.0, 750.0};
+inline const double tankRadius{120.0};
 
 enum class ObservationKind{
   Distance,
@@ -64,7 +68,19 @@ std::vector<Station> makeStations(const std::vector<Station>& addedStations, con
   return stations;
 };
 
-bool visible(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
+// Overload to compute preliminary analysis
+template <std::size_t N>
+std::vector<Station> makeStations(const Station* const (&stationPtrs)[N]) {
+    std::vector<Station> stations;
+
+    for (const Station* existing : stationPtrs) {
+        stations.push_back(*existing);
+    }
+
+    return stations;
+}
+
+bool visible(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const GeoPolygon& building);
 
 struct Network{
   std::vector<Station> stations;
@@ -86,4 +102,4 @@ struct Analysis{
 
 Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool isAzimuth);
 
-void analyze(const string& title, const std::vector<Station>& s, int iterations);
+void analyze(const std::string& title, const std::vector<Station>& s, int iterations, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building);
