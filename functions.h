@@ -82,23 +82,6 @@ std::vector<Station> makeStations(const Station* const (&stationPtrs)[N]) {
 
 bool visible(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const GeoPolygon& building);
 
-struct Network{
-  std::vector<Station> stations;
-  std::vector<std::pair<int, int>> visibleLines;
-  std::vector<Observation> observations;
-  Eigen::MatrixXd A;
-}; 
-
-
-struct Analysis{
-  Eigen::MatrixXd Cx;
-  Ellipse point1;
-  Ellipse relative12;
-  bool coversCorners = false;
-  bool passesPrecision = false;
-  double minimumRedundancy = 1.0;
-  double maximumPoint1Shift = 0.0;
-};
 
 Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool isAzimuth);
 

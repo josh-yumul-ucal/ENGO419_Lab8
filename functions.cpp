@@ -70,7 +70,7 @@ void analyze(const std::string& title, const std::vector<Station>& s,
     for (int j = std::max(i + 1, 2); j < n; j++){
       if (visible(s[i].position, s[j].position, building)){
         rows.push_back(designRow(s, i, j, false));
-        sigmas.push_back(0.002);
+        sigmas.push_back(SIGMA_DIST);
       }
     }
   }
@@ -127,7 +127,7 @@ void analyze(const std::string& title, const std::vector<Station>& s,
 
   // Print statements
   std::cout << "\n" << title << "\n";
-  std::cout << "Observations: " << A.rows() << ", unknowns: " << A.cols() << ", readings:" << A.rows() * iterations << "\n";
+  std::cout << "Observations: " << A.rows() << ", unknowns: " << A.cols() << ", readings: " << A.rows() * iterations << "\n";
   /*
   TODO: INCLUDE ELLIPSE PRINTING SOMEWHERE HERE
   */
