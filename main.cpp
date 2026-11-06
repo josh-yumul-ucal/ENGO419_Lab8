@@ -85,5 +85,16 @@ int main(){
 
   analyze("Iteration 4: P4 added,  2 rounds of observations", stationsV2, 2, buildingPoints, building);
 
+  analyze("Iteration 5: P3 added only, 4 rounds of observations", stationsV1, 4, buildingPoints, building);
+
+  Station P5{"P5", Eigen::Vector2d{1300, 600}, false};
+  addedStations.push_back(P5);
+  std::vector<Station> stationsV3 = makeStations(addedStations, initial);
+  analyze("Iteration 6: P5 added", stationsV3, 1, buildingPoints, building);
+
+  analyze("Iteration 7: P5 added, 2 rounds of observations", stationsV3, 2, buildingPoints, building);
+
+  analyze("Iteration 8: P3 added only, 7 rounds of observations", stationsV1, 7, buildingPoints, building);
+
   return 0;
 };
