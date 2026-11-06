@@ -1,6 +1,7 @@
 #include "functions.h"
 #include <iostream>
 #include <Eigen/Dense>
+#include <algorithm>
 #include <cmath>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
@@ -63,7 +64,7 @@ Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool i
 
 
 void analyze(const std::string& title, const std::vector<Station>& s, 
-  int iterations, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building){
+  int measurementSets, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building){
   int n = s.size();
   std::vector<Eigen::RowVectorXd> rows;
   std::vector<double> sigmas;
@@ -93,7 +94,7 @@ void analyze(const std::string& title, const std::vector<Station>& s,
   Eigen::VectorXd sigma(rows.size());
   for (size_t i = 0; i < rows.size(); i++){
     A.row(i) = rows[i];
-    sigma(i) = sigmas[i] / sqrt(double(iterations));
+    sigma(i) = sigmas[i] / sqrt(double(measurementSets));
   }
 
   // Standard covariance computations to find covariances of parameters
@@ -130,7 +131,7 @@ void analyze(const std::string& title, const std::vector<Station>& s,
 
   // Print statements
   std::cout << "\n" << title << "\n";
-  std::cout << "Observations: " << A.rows() << ", unknowns: " << A.cols() << ", readings: " << A.rows() * iterations << "\n";
+  std::cout << "Observations: " << A.rows() << ", unknowns: " << A.cols() << ", readings: " << A.rows() * measurementSets << "\n";
   std::cout << "Corners Visible: " << cornersSeen << " of " << buildingPoints.size() << "\n";
   std::cout << "Minimum redundancy: " << minR << "\n";
   std::cout << "Maximum P1 shift from an MDB [mm]: " << 1000 * maxShift << "\n";
@@ -158,5 +159,5 @@ void printEllipse(const std::string& label, const Eigen::Matrix2d& Cx){
   double orientation = 0.5 * atan2(2 * sigmaXY, sigmaX2 - sigmaY2) * 180 / PI;
   
   // Print to terminal
-  std::cout << label << "major/minor (mm): " << Smax << " / " << Smin << ", orientation (deg): " << orientation << "\n";
+  std::cout << label << " major/minor (mm): " << Smax << " / " << Smin << ", orientation (deg): " << orientation << "\n";
 };

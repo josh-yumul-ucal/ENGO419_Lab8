@@ -39,7 +39,7 @@ return bg::distance(tankPoint, sight) >= tankRadius && !bg::crosses(sight, build
 Checks whether the line of sight between two coordinates is obstructed by either the building or the tank. No obstruction from either object means that the two coordinates have a line of sight to one another. This function is used within analyze() to compute which building corners are visible to the point network. 
 
 ## Example of a non-optimal design 
-The network with 
+The network with only a single added point at (1600.0, 1100.0) is insufficient
 
 ## Reasoning behind conclusions
 <fill in later> 

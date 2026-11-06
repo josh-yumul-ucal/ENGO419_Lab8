@@ -62,11 +62,11 @@ int main(){
   // Task 1: Visual approximation of added points
   Station P3{"P3", Eigen::Vector2d{1600.0, 1100.0}, false};
 
-  std::vector<Station> addedStationsV1;
-  addedStationsV1.push_back(P3);
+  std::vector<Station> addedStations;
+  addedStations.push_back(P3);
 
   std::vector<Station> preliminary = makeStations(initial);
-  std::vector<Station> stationsV1 = makeStations(addedStationsV1, initial);
+  std::vector<Station> stationsV1 = makeStations(addedStations, initial);
 
   std::cout << std::fixed;
   std::cout.precision(8);
@@ -76,7 +76,14 @@ int main(){
 
   analyze("Iteration 1: P3 added",
   stationsV1, 1, buildingPoints, building);
+  analyze("Iteration 2: P3 added, 3 rounds of observations", stationsV1, 3, buildingPoints, building);
 
+  Station P4{"P4", Eigen::Vector2d{1700.0, 600.0}, false};
+  addedStations.push_back(P4);
+  std::vector<Station> stationsV2 = makeStations(addedStations, initial);
+  analyze("Iteration 3: P4 added", stationsV2, 1, buildingPoints, building);
+
+  analyze("Iteration 4: P4 added,  2 rounds of observations", stationsV2, 2, buildingPoints, building);
 
   return 0;
 };

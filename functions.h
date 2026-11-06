@@ -5,6 +5,7 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <iostream>
 #include <Eigen/Dense>
+#include <stdexcept>
 #include <vector>
 namespace bg = boost::geometry;
 
@@ -85,6 +86,6 @@ bool visible(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const GeoPolygo
 
 Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool isAzimuth);
 
-void analyze(const std::string& title, const std::vector<Station>& s, int iterations, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building);
+void analyze(const std::string& title, const std::vector<Station>& s, int measurementSets, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building);
 
 void printEllipse(const std::string& label, const Eigen::Matrix2d& c);
