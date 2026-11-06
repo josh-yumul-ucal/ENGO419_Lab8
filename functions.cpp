@@ -18,6 +18,9 @@ constexpr double TOLERANCE = 1e-89;
 namespace bm = boost::math;
 namespace bg = boost::geometry;
 
+// Forward declaration of printEllipse cause I did it after I made analyze
+void printEllipse(const std::string& label, const Eigen::Matrix2d& Cx);
+
 using GeoPoint = bg::model::d2::point_xy<double>;
 using GeoLine = bg::model::linestring<GeoPoint>;
 using GeoPolygon = bg::model::polygon<GeoPoint>;
@@ -128,13 +131,32 @@ void analyze(const std::string& title, const std::vector<Station>& s,
   // Print statements
   std::cout << "\n" << title << "\n";
   std::cout << "Observations: " << A.rows() << ", unknowns: " << A.cols() << ", readings: " << A.rows() * iterations << "\n";
-  /*
-  TODO: INCLUDE ELLIPSE PRINTING SOMEWHERE HERE
-  */
   std::cout << "Corners Visible: " << cornersSeen << " of " << buildingPoints.size() << "\n";
   std::cout << "Minimum redundancy: " << minR << "\n";
   std::cout << "Maximum P1 shift from an MDB [mm]: " << 1000 * maxShift << "\n";
   std::cout << "Cx [m^2]: \n" << Cx << "\n";
 
+  // Ellipse parameters print statements
+  printEllipse("95% P1 Ellipse", C11);
+  printEllipse("95% P1-P2 relative ellipse", Crel);
+};
 
+
+void printEllipse(const std::string& label, const Eigen::Matrix2d& Cx){
+  double sigmaX2 = Cx(0, 0);
+  double sigmaY2 = Cx(1, 1);
+  double sigmaXY = Cx(0, 1);
+
+  // Error ellipse computations
+  double a2 = 0.5 * (sigmaX2 + sigmaY2 + sqrt(pow(sigmaX2 - sigmaY2, 2) + 4 * pow(sigmaXY, 2)));
+  double b2 = 0.5 * (sigmaX2 + sigmaY2 - sqrt(pow(sigmaX2 - sigmaY2, 2) + 4 * pow(sigmaXY, 2)));
+
+  // 95% CI Scale
+  double Smax = 1000 * chi95 * sqrt(a2);
+  double Smin = 1000 * chi95 * sqrt(b2);
+
+  double orientation = 0.5 * atan2(2 * sigmaXY, sigmaX2 - sigmaY2) * 180 / PI;
+  
+  // Print to terminal
+  std::cout << label << "major/minor (mm): " << Smax << " / " << Smin << ", orientation (deg): " << orientation << "\n";
 };
