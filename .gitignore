@@ -1,6 +1,10 @@
 # Python Venv
 .venv/
 
+# Lab Report
+*.docx
+
+
 # Generated results
 *.csv
 
