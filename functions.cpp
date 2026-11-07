@@ -9,12 +9,15 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <vector>
 #include <string>
+#include <fstream>
 
 
 constexpr double PI = 3.1415926535897932384626433832795;
 constexpr const double SIGMA_DIST = 0.002;
 constexpr const double SIGMA_ANGLE = 2.0 * PI / 648000.0;
 constexpr double TOLERANCE = 1e-89;
+constexpr double P1_MAXIMUM_VALUE = 3.0;
+constexpr double RELATIVE_MAXIMUM_VALUE = 5.0;
 
 namespace bm = boost::math;
 namespace bg = boost::geometry;
@@ -63,7 +66,7 @@ Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool i
 };
 
 
-void analyze(const std::string& title, const std::vector<Station>& s, 
+designResult analyze(const std::string& title, const std::vector<Station>& s, 
   int measurementSets, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building){
   int n = s.size();
   std::vector<Eigen::RowVectorXd> rows;
@@ -140,6 +143,9 @@ void analyze(const std::string& title, const std::vector<Station>& s,
   // Ellipse parameters print statements
   printEllipse("95% P1 Ellipse", C11);
   printEllipse("95% P1-P2 relative ellipse", Crel);
+
+  return {title, s, measurementSets, static_cast<int>(A.rows()), static_cast<int>(A.cols()), cornersSeen, 
+    minR, maxShift, Cx, Crel};
 };
 
 
@@ -160,4 +166,129 @@ void printEllipse(const std::string& label, const Eigen::Matrix2d& Cx){
   
   // Print to terminal
   std::cout << label << " major/minor (mm): " << Smax << " / " << Smin << ", orientation (deg): " << orientation << "\n";
+}
+
+static const char* yesNo(bool value){
+  return value ? "yes" : "no";
 };
+
+Ellipse computeEllipse(const Eigen::Matrix2d &Cx)
+{
+  double sigmaX2 = Cx(0, 0);
+  double sigmaY2 = Cx(1, 1);
+  double sigmaXY = Cx(0, 1);
+
+  // Error ellipse computations
+  double a2 = 0.5 * (sigmaX2 + sigmaY2 + sqrt(pow(sigmaX2 - sigmaY2, 2) + 4 * pow(sigmaXY, 2)));
+  double b2 = 0.5 * (sigmaX2 + sigmaY2 - sqrt(pow(sigmaX2 - sigmaY2, 2) + 4 * pow(sigmaXY, 2)));
+
+  // 95% CI Scale
+  double Smax = 1000 * chi95 * sqrt(a2);
+  double Smin = 1000 * chi95 * sqrt(b2);
+
+  double orientation = 0.5 * atan2(2 * sigmaXY, sigmaX2 - sigmaY2) * 180 / PI;
+
+  return {Smax, Smin, orientation};
+}
+
+std::ofstream openCSV(const std::string &path){
+  std::ofstream file(path);
+  if(!file){
+    throw std::runtime_error("Could not write to " + path);
+  };
+  file << std::fixed << std::setprecision(8);
+  return file;
+  
+};
+
+void saveResults(const designResult &result, const GeoPolygon &building) {
+  std::ofstream summary = openCSV("summary.csv");
+  std::ofstream ellipses = openCSV("ellipses.csv");
+  std::ofstream stations = openCSV("stations.csv");
+  std::ofstream sightlines = openCSV("sightlines.csv");
+
+  // CSV headers
+  summary << "design,added_stations,measurement_sets,observations,unknowns,readings,"
+        << "corners_seen,min_redundancy,max_p1_shift_mm,"
+        << "p1_major_mm,p1_minor_mm,p1_orientation_deg,"
+        << "rel_major_mm,rel_minor_mm,rel_orientation_deg,"
+        << "meets_p1_spec,meets_rel_spec\n";
+
+  ellipses << "design,name,center_x,center_y,major_mm,minor_mm,orientation_deg\n";
+  stations << "design,name,x,y,fixed\n";
+  sightlines << "design,station_a,station_b\n";
+
+  // Design results
+  const std::string design = "\"" + result.title + "\"";
+  const std::vector<Station>& s = result.stations;
+
+
+  std::string added;
+  for (size_t i = 4; i < s.size(); i++){
+    added += (added.empty() ? "" : " " ) + s[i].name;
+  };
+
+  Eigen::Matrix2d C11 = result.Cx.block<2, 2>(0,0);
+  Ellipse P1 = computeEllipse(C11);
+  Ellipse relative = computeEllipse(result.Crel);
+
+  summary << design << ","
+  << (added.empty() ? "none" : added) << ","
+  << result.measurementSets << ","
+  << result.observations << ","
+  << result.unknowns << ","
+  << result.observations * result.measurementSets << ","
+  << result.cornersSeen << ","
+  << result.minRedundancy << ","
+  << 1000 * result.maxP1Shift << ","
+  << P1.majorAxis << ","
+  << P1.minorAxis << ","
+  << P1.orientation << ","
+  << relative.majorAxis << ","
+  << relative.minorAxis << ","
+  << relative.orientation << ","
+  << yesNo(P1.majorAxis < P1_MAXIMUM_VALUE) << ","
+  << yesNo(relative.majorAxis < RELATIVE_MAXIMUM_VALUE) << "\n";
+
+
+  for (size_t i = 0; i < s.size(); i++){
+    stations << design << ","
+    << s[i].name << ","
+    << s[i].position.x() << ","
+    << s[i].position.y() << ","
+    << yesNo(s[i].fixed) << "\n";
+
+    for (size_t j = i + 1; j < s.size(); j++){
+      if (visible(s[i].position, s[j].position, building)){
+        sightlines << design << "," 
+        << s[i].name << ","
+        << s[j].name << "\n";
+      }
+    }
+    // P1 error ellipse parameters
+    if (i >= 2){
+    Eigen::Matrix2d C = result.Cx.block<2, 2>(2 * (i - 2), 2 * (i - 2));
+
+    Ellipse e = computeEllipse(C);
+    ellipses << design << ","
+    << s[i].name << ","
+    << s[i].position.x() << ","
+    << s[i].position.y() << ","
+    << e.majorAxis << ","
+    << e.minorAxis << ","
+    << e.orientation << "\n";
+    }
+  }
+
+  // Relative error ellipse parameters
+  Eigen::Vector2d midpoint =
+    0.5 * (s[2].position + s[3].position);
+
+  ellipses << design << ",P1-P2,"
+          << midpoint.x() << ","
+          << midpoint.y() << ","
+          << relative.majorAxis << ","
+          << relative.minorAxis << ","
+          << relative.orientation << "\n";
+
+}

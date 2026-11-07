@@ -4,6 +4,7 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <iostream>
+#include <fstream>
 #include <Eigen/Dense>
 #include <stdexcept>
 #include <vector>
@@ -86,6 +87,30 @@ bool visible(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const GeoPolygo
 
 Eigen::RowVectorXd designRow(const std::vector<Station>& s, int i, int j, bool isAzimuth);
 
-void analyze(const std::string& title, const std::vector<Station>& s, int measurementSets, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building);
+struct designResult{
+  std::string title;
+  std::vector<Station> stations;
+  int measurementSets;
+  int observations;
+  int unknowns;
+  int cornersSeen;
+  double minRedundancy;
+  double maxP1Shift;
+  Eigen::MatrixXd Cx;
+  Eigen::Matrix2d Crel;
+};
+
+designResult analyze(const std::string& title, const std::vector<Station>& s, int measurementSets, const std::vector<Eigen::Vector2d>& buildingPoints, const GeoPolygon& building);
 
 void printEllipse(const std::string& label, const Eigen::Matrix2d& c);
+
+Ellipse computeEllipse(const Eigen::Matrix2d& Cx);
+
+std::ofstream openCSV(const std::string& path);
+
+void saveResults(const designResult& result, const GeoPolygon& building);
+
+
+
+
+

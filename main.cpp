@@ -71,30 +71,32 @@ int main(){
   std::cout << std::fixed;
   std::cout.precision(8);
 
-  analyze("Preliminary: no new stations",
+  designResult preliminaryTrial = analyze("Preliminary: no new stations",
         preliminary, 1, buildingPoints, building);
 
-  analyze("Iteration 1: P3 added",
+  designResult iter1 = analyze("Iteration 1: P3 added",
   stationsV1, 1, buildingPoints, building);
-  analyze("Iteration 2: P3 added, 3 rounds of observations", stationsV1, 3, buildingPoints, building);
+  designResult iter2 = analyze("Iteration 2: P3 added, 3 rounds of observations", stationsV1, 3, buildingPoints, building);
 
   Station P4{"P4", Eigen::Vector2d{1700.0, 600.0}, false};
   addedStations.push_back(P4);
   std::vector<Station> stationsV2 = makeStations(addedStations, initial);
-  analyze("Iteration 3: P4 added", stationsV2, 1, buildingPoints, building);
+  designResult iter3 = analyze("Iteration 3: P4 added", stationsV2, 1, buildingPoints, building);
 
-  analyze("Iteration 4: P4 added,  2 rounds of observations", stationsV2, 2, buildingPoints, building);
+  designResult iter4 = analyze("Iteration 4: P4 added,  2 rounds of observations", stationsV2, 2, buildingPoints, building);
 
-  analyze("Iteration 5: P3 added only, 4 rounds of observations", stationsV1, 4, buildingPoints, building);
+  designResult iter5 = analyze("Iteration 5: P3 added only, 4 rounds of observations", stationsV1, 4, buildingPoints, building);
 
   Station P5{"P5", Eigen::Vector2d{1300, 600}, false};
   addedStations.push_back(P5);
   std::vector<Station> stationsV3 = makeStations(addedStations, initial);
-  analyze("Iteration 6: P5 added", stationsV3, 1, buildingPoints, building);
+  designResult iter6 = analyze("Iteration 6: P5 added", stationsV3, 1, buildingPoints, building);
 
-  analyze("Iteration 7: P5 added, 2 rounds of observations", stationsV3, 2, buildingPoints, building);
+  designResult iter7 = analyze("Iteration 7: P5 added, 2 rounds of observations", stationsV3, 2, buildingPoints, building);
 
-  analyze("Iteration 8: P3 added only, 7 rounds of observations", stationsV1, 7, buildingPoints, building);
+  designResult iter8 = analyze("Iteration 8: P3 added only, 7 rounds of observations", stationsV1, 7, buildingPoints, building);
+
+  saveResults(iter8, building);
 
   return 0;
 };
