@@ -96,9 +96,19 @@ int main(){
 
   designResult iter8 = analyze("Iteration 8: P3 added only, 7 rounds of observations", stationsV1, 7, buildingPoints, building);
 
+  designResult iter9 = analyze("Iteration 9: P5 added, 3 rounds of measurements", stationsV3, 3, buildingPoints, building);
+
+  std::vector<Station> addedStationsV4{P3, P5};
+  std::vector<Station> stationsV4 = makeStations(addedStationsV4, initial);
+
+  designResult iter10 = analyze("Iteration 10: P3 + P5, 4 rounds of observations", stationsV4, 4, buildingPoints, building);
+
   saveResults(iter8, building, "iter8");
   saveResults(iter4, building, "iter4");
   saveResults(iter3, building, "iter3");
   saveResults(preliminaryTrial, building, "preliminary");
+  saveResults(iter9, building, "iter9");
+  saveResults(iter10, building, "iter10");
+
   return 0;
 };
