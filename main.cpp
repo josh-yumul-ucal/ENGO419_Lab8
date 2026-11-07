@@ -96,7 +96,9 @@ int main(){
 
   designResult iter8 = analyze("Iteration 8: P3 added only, 7 rounds of observations", stationsV1, 7, buildingPoints, building);
 
-  saveResults(iter8, building);
-
+  saveResults(iter8, building, "iter8");
+  saveResults(iter4, building, "iter4");
+  saveResults(iter3, building, "iter3");
+  saveResults(preliminaryTrial, building, "preliminary");
   return 0;
 };

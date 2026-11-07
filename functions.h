@@ -108,7 +108,7 @@ Ellipse computeEllipse(const Eigen::Matrix2d& Cx);
 
 std::ofstream openCSV(const std::string& path);
 
-void saveResults(const designResult& result, const GeoPolygon& building);
+void saveResults(const designResult& result, const GeoPolygon& building, const std::string name);
 
 
 

@@ -201,11 +201,11 @@ std::ofstream openCSV(const std::string &path){
   
 };
 
-void saveResults(const designResult &result, const GeoPolygon &building) {
-  std::ofstream summary = openCSV("summary.csv");
-  std::ofstream ellipses = openCSV("ellipses.csv");
-  std::ofstream stations = openCSV("stations.csv");
-  std::ofstream sightlines = openCSV("sightlines.csv");
+void saveResults(const designResult &result, const GeoPolygon &building, const std::string name) {
+  std::ofstream summary = openCSV(name + "_summary.csv");
+  std::ofstream ellipses = openCSV(name + "_ellipses.csv");
+  std::ofstream stations = openCSV(name + "_stations.csv");
+  std::ofstream sightlines = openCSV(name + "_sightlines.csv");
 
   // CSV headers
   summary << "design,added_stations,measurement_sets,observations,unknowns,readings,"

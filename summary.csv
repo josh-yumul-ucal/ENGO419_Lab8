@@ -1,2 +1,0 @@
-design,added_stations,measurement_sets,observations,unknowns,readings,corners_seen,min_redundancy,max_p1_shift_mm,p1_major_mm,p1_minor_mm,p1_orientation_deg,rel_major_mm,rel_minor_mm,rel_orientation_deg,meets_p1_spec,meets_rel_spec
-"Iteration 8: P3 added only, 7 rounds of observations",P3,7,14,6,98,6,0.19104731,4.68889102,2.94527529,1.48647979,-19.02523117,2.37379123,1.38305881,-51.87999720,yes,yes,
